@@ -7,7 +7,7 @@ async function mmH(url) {
     browser = await chromium.puppeteer.launch({
       args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
       executablePath: await chromium.executablePath,
-      headless: false, // Set to true if you want headless mode
+      headless: true, // Diatur ke true untuk deployment di Vercel
       ignoreDefaultArgs: ['--disable-extensions'],
       handleSIGINT: false,
       handleSIGTERM: false,
@@ -23,28 +23,30 @@ async function mmH(url) {
         request.url().includes("workink.click") ||
         request.url().includes("youradexchange.com")
       ) {
-        request.abort(); // Block ad requests
+        request.abort(); // Memblokir permintaan iklan
       } else {
         request.continue();
       }
     });
 
-    await page.goto(url, { waitUntil: "networkidle2" });
+    // Meningkatkan timeout untuk pemuatan halaman
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+
     page.on("popup", async (popup) => {
-      console.log("Popup appeared, closing it...");
+      console.log("Popup muncul, menutupnya...");
       await popup.close();
     });
 
-    await new Promise((r) => setTimeout(r, 10000)); // Wait for 10 seconds
+    await page.waitForTimeout(10000); // Tunggu selama 10 detik
 
     await page.waitForSelector('button[target="_blank"]');
     await page.click('button[target="_blank"]');
 
-    await new Promise((r) => setTimeout(r, 5000)); // Wait for 5 seconds
+    await page.waitForTimeout(5000); // Tunggu selama 5 detik
 
     const pages = await browser.pages();
     const newPage = pages[pages.length - 1];
-    console.log(`New URL: ${newPage.url()}`);
+    console.log(`URL Baru: ${newPage.url()}`);
 
     const parsedUrl = new URL(newPage.url());
     const r = parsedUrl.searchParams.get("r");
@@ -56,14 +58,18 @@ async function mmH(url) {
     console.log(`${urlResult}`);
 
     await newPage.close();
-    console.log("New page successfully closed.");
+    console.log("Halaman baru berhasil ditutup.");
 
     return urlResult;
-    browser.close();
+    
   } catch (error) {
-    console.error("An error occurred:", error);
-    throw new Error("An error occurred while scraping.");
-  } 
+    console.error("Terjadi kesalahan:", error);
+    throw new Error("Terjadi kesalahan saat melakukan scraping.");
+  } finally {
+    if (browser) {
+      await browser.close(); // Pastikan browser ditutup
+    }
+  }
 }
 
 module.exports = mmH;
