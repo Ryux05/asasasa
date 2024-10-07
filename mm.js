@@ -30,7 +30,7 @@ async function mmH(url) {
     });
 
     // Meningkatkan timeout untuk pemuatan halaman
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+    await page.goto(url, { waitUntil: "domcontentloaded" });
 
     page.on("popup", async (popup) => {
       console.log("Popup muncul, menutupnya...");
