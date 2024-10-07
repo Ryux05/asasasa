@@ -7,6 +7,9 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.get("/", (req,res) => {
+res.json({text:"/delta?url="})  
+})
 
 app.get("/delta", async (req, res) => {
   const { url } = req.query; // Extract the 'url' query parameter
