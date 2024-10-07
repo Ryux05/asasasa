@@ -1,21 +1,16 @@
-const chromium = require('chrome-aws-lambda');
-const { connect } = require('puppeteer-real-browser');
+const { connect } = require("puppeteer-real-browser");
 
 async function mmH(url) {
-  let browser;
   try {
-    browser = await chromium.puppeteer.launch({
-      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: await chromium.executablePath,
-      headless: true, // Diatur ke true untuk deployment di Vercel
-      ignoreDefaultArgs: ['--disable-extensions'],
-      handleSIGINT: false,
-      handleSIGTERM: false,
-      handleSIGHUP: false,
+    const { browser, page } = await connect({
+      headless: false,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--ignore-certificate-errors",
+      ],
       turnstile: true,
     });
-
-    const page = await browser.newPage();
 
     await page.setRequestInterception(true);
     page.on("request", (request) => {
@@ -23,30 +18,40 @@ async function mmH(url) {
         request.url().includes("workink.click") ||
         request.url().includes("youradexchange.com")
       ) {
-        request.abort(); // Memblokir permintaan iklan
+        request.abort(); // Memblokir permintaan ke iklan
       } else {
         request.continue();
       }
     });
 
-    // Meningkatkan timeout untuk pemuatan halaman
     await page.goto(url, { waitUntil: "domcontentloaded" });
-
     page.on("popup", async (popup) => {
-      console.log("Popup muncul, menutupnya...");
+      console.log("Pop-up muncul, menutupnya...");
       await popup.close();
     });
-
-    await page.waitForTimeout(10000); // Tunggu selama 10 detik
+    await new Promise((r) => setTimeout(r, 10000));
 
     await page.waitForSelector('button[target="_blank"]');
     await page.click('button[target="_blank"]');
 
-    await page.waitForTimeout(5000); // Tunggu selama 5 detik
+    await new Promise((r) => setTimeout(r, 5000)); // Tunggu 5 detik
 
     const pages = await browser.pages();
     const newPage = pages[pages.length - 1];
     console.log(`URL Baru: ${newPage.url()}`);
+
+    // Menunggu navigasi dengan penanganan kesalahan
+    /*try {
+      await newPage.waitForNavigation({
+        waitUntil: "networkidle2",
+        timeout: 60000,
+      });
+    } catch (navigationError) {
+      console.error(
+        "Kesalahan saat menunggu navigasi:",
+        navigationError
+      );
+    }**/
 
     const parsedUrl = new URL(newPage.url());
     const r = parsedUrl.searchParams.get("r");
@@ -54,22 +59,22 @@ async function mmH(url) {
     const linkvertise = decodeURIComponent(r);
     console.log(`Loot-link: ${linkvertise}`);
 
-    const urlResult = Buffer.from(linkvertise, "base64").toString("utf-8");
+    const urlResult = Buffer.from(
+      linkvertise,
+      "base64"
+    ).toString("utf-8");
     console.log(`${urlResult}`);
 
     await newPage.close();
     console.log("Halaman baru berhasil ditutup.");
 
+    await browser.close();
     return urlResult;
-    
   } catch (error) {
-     console.error("Terjadi kesalahan:", error.message); // Menampilkan pesan kesalahan yang lebih spesifik
-    console.error(error.stack);
-    throw new Error("Terjadi kesalahan saat melakukan scraping.");
-  } finally {
-    if (browser) {
-      await browser.close(); // Pastikan browser ditutup
-    }
+    console.error("Kesalahan terjadi:", error);
+    throw new Error(
+      "Terjadi kesalahan saat melakukan scraping."
+    );
   }
 }
 
