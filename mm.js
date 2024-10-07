@@ -63,7 +63,8 @@ async function mmH(url) {
     return urlResult;
     
   } catch (error) {
-    console.error("Terjadi kesalahan:", error);
+     console.error("Terjadi kesalahan:", error.message); // Menampilkan pesan kesalahan yang lebih spesifik
+    console.error(error.stack);
     throw new Error("Terjadi kesalahan saat melakukan scraping.");
   } finally {
     if (browser) {
