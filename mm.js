@@ -59,14 +59,11 @@ async function mmH(url) {
     console.log("New page successfully closed.");
 
     return urlResult;
+    browser.close();
   } catch (error) {
     console.error("An error occurred:", error);
     throw new Error("An error occurred while scraping.");
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
+  } 
 }
 
 module.exports = mmH;
