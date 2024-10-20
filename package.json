@@ -2,18 +2,18 @@
   "name": "cloudflare-bypass-bot",
   "version": "1.0.0",
   "description": "A Puppeteer bot to bypass Cloudflare protection",
-  "main": "index.js", // Ganti dengan nama file utama Anda jika berbeda
+  "main": "index.js", 
   "scripts": {
-    "start": "node index.js" // Ganti dengan nama file utama Anda jika berbeda
+    "start": "node index.js" 
   },
   "dependencies": {
-    "chrome-aws-lambda": "^10.1.0", // Versi terbaru saat penulisan
-    "puppeteer-core": "^19.0.0", // Versi terbaru saat penulisan
-    "puppeteer-extra": "^3.2.0", // Versi terbaru saat penulisan
-    "puppeteer-extra-plugin-stealth": "^2.8.0" // Versi terbaru saat penulisan
+    "chrome-aws-lambda": "^10.1.0", 
+    "puppeteer-core": "^19.0.0", 
+    "puppeteer-extra": "^3.2.0", 
+    "puppeteer-extra-plugin-stealth": "^2.8.0" 
   },
   "engines": {
-    "node": ">=14.0.0" // Versi Node.js yang direkomendasikan
+    "node": ">=14.0.0" 
   },
   "license": "MIT"
 }
