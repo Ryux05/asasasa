@@ -72,9 +72,7 @@ async function mmH(url) {
     return urlResult;
   } catch (error) {
     console.error("Kesalahan terjadi:", error);
-    throw new Error(
-      "Terjadi kesalahan saat melakukan scraping."
-    );
+    return error;
   }
 }
 
