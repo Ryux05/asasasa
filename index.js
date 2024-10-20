@@ -23,7 +23,7 @@ app.get("/delta", async (req, res) => {
     res.status(200).json({ urlResult }); // Respond with the key in JSON format
   } catch (error) {
     console.error("Error occurred:", error);
-    res.status(500).json({ error: error.message }); // Return the error message
+    res.status(500).json({ error: error }); // Return the error message
   }
 });
 
