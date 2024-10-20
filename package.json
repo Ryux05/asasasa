@@ -4,7 +4,6 @@
   "description": "A Puppeteer bot to bypass Cloudflare protection",
   "main": "index.js", 
   "scripts": {
-  "install": "npm install --legacy-peer-deps",
   "start": "node index.js",
   "test": "echo \"Error: no test specified\" && exit 1"
 },
