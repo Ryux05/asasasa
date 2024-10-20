@@ -3,7 +3,7 @@ const { connect } = require("puppeteer-real-browser");
 async function mmH(url) {
   try {
     const { browser, page } = await connect({
-      headless: false,
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
