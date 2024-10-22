@@ -5,7 +5,7 @@ FROM node:16-buster
 RUN apt-get update && apt-get install -y xvfb
 
 # Set direktori kerja di dalam container
-WORKDIR /app
+WORKDIR /index
 
 # Copy file package.json dan package-lock.json untuk menginstall dependencies
 COPY package*.json ./
