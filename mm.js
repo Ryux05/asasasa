@@ -31,8 +31,13 @@ async function mmH(url) {
     });
     await new Promise((r) => setTimeout(r, 10000));
 
-    await page.waitForSelector('button[target="_blank"]', {timeout:60000});
+    const button = await page.$('button[target="_blank"]');
+    if (button) {
     await page.click('button[target="_blank"]');
+    console.log('Tombol diklik.');
+    } else {
+    console.log('Tombol tidak ditemukan.');
+    }
 
     await new Promise((r) => setTimeout(r, 5000)); // Tunggu 5 detik
 
@@ -40,18 +45,6 @@ async function mmH(url) {
     const newPage = pages[pages.length - 1];
     console.log(`URL Baru: ${newPage.url()}`);
 
-    // Menunggu navigasi dengan penanganan kesalahan
-    /*try {
-      await newPage.waitForNavigation({
-        waitUntil: "networkidle2",
-        timeout: 60000,
-      });
-    } catch (navigationError) {
-      console.error(
-        "Kesalahan saat menunggu navigasi:",
-        navigationError
-      );
-    }*/
 
     const parsedUrl = new URL(newPage.url());
     const r = parsedUrl.searchParams.get("r");
