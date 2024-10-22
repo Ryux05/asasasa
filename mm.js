@@ -24,7 +24,7 @@ async function mmH(url) {
       }
     });
 
-    await page.goto(url, { waitUntil: "networkidle0" });
+    await page.goto(url, { waitUntil: "domcontentloaded" });
     page.on("popup", async (popup) => {
       console.log("Pop-up muncul, menutupnya...");
       await popup.close();
