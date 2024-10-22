@@ -17,7 +17,7 @@ RUN npm install express puppeteer-real-browser
 COPY . .
 
 # Expose port aplikasi (sesuaikan dengan port yang digunakan)
-EXPOSE 3000
+EXPOSE 8080
 
 # Perintah untuk menjalankan aplikasi
 CMD ["npm", "start"]
