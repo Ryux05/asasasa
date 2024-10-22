@@ -3,7 +3,7 @@ const { connect } = require("puppeteer-real-browser");
 async function mmH(url) {
   try {
     const { browser, page } = await connect({
-      headless: true,
+      headless: false,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -25,38 +25,53 @@ async function mmH(url) {
     });
 
     await page.goto(url, { waitUntil: "domcontentloaded" });
+
     page.on("popup", async (popup) => {
       console.log("Pop-up muncul, menutupnya...");
       await popup.close();
     });
-    await new Promise((r) => setTimeout(r, 10000));
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     const button = await page.$('button[target="_blank"]');
     if (button) {
-    await page.click('button[target="_blank"]');
-    console.log('Tombol diklik.');
+      await page.click('button[target="_blank"]');
+      console.log('Tombol diklik.');
     } else {
-    console.log('Tombol tidak ditemukan.');
+      console.log('Tombol tidak ditemukan.');
+      await browser.close();
+      return null; // Kembali jika tombol tidak ditemukan
     }
 
-    await new Promise((r) => setTimeout(r, 5000)); // Tunggu 5 detik
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // Tunggu 5 detik
 
     const pages = await browser.pages();
     const newPage = pages[pages.length - 1];
     console.log(`URL Baru: ${newPage.url()}`);
 
-
     const parsedUrl = new URL(newPage.url());
     const r = parsedUrl.searchParams.get("r");
+
+    if (!r) {
+      console.log('Parameter r tidak ditemukan di URL baru.');
+      await newPage.close();
+      await browser.close();
+      return null; // Kembali jika r tidak ditemukan
+    }
 
     const linkvertise = decodeURIComponent(r);
     console.log(`Loot-link: ${linkvertise}`);
 
-    const urlResult = Buffer.from(
-      linkvertise,
-      "base64"
-    ).toString("utf-8");
-    console.log(`${urlResult}`);
+    let urlResult;
+    try {
+      urlResult = Buffer.from(linkvertise, "base64").toString("utf-8");
+      console.log(`Decoded URL: ${urlResult}`);
+    } catch (decodeError) {
+      console.error('Error saat mendekode Base64:', decodeError);
+      await newPage.close();
+      await browser.close();
+      return null; // Kembali jika ada kesalahan saat decoding
+    }
 
     await newPage.close();
     console.log("Halaman baru berhasil ditutup.");
@@ -65,7 +80,7 @@ async function mmH(url) {
     return urlResult;
   } catch (error) {
     console.error("Kesalahan terjadi:", error);
-    return error;
+    return null; // Kembali null jika terjadi kesalahan
   }
 }
 
