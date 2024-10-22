@@ -24,14 +24,14 @@ async function mmH(url) {
       }
     });
 
-    await page.goto(url, { waitUntil: "domcontentloaded" });
+    await page.goto(url, { waitUntil: "networkidle0" });
     page.on("popup", async (popup) => {
       console.log("Pop-up muncul, menutupnya...");
       await popup.close();
     });
     await new Promise((r) => setTimeout(r, 10000));
 
-    await page.waitForSelector('button[target="_blank"]');
+    await page.waitForSelector('button[target="_blank"]', {timeout:60000});
     await page.click('button[target="_blank"]');
 
     await new Promise((r) => setTimeout(r, 5000)); // Tunggu 5 detik
