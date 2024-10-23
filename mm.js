@@ -1,8 +1,9 @@
 const { connect } = require("puppeteer-real-browser");
+const cheerio = require("cheerio");
 
 async function mmH(url) {
   try {
-    const { browser, page } = await connect({
+    ({ browser, page } = await connect({
       headless: false,
       args: [
         "--no-sandbox",
@@ -10,14 +11,11 @@ async function mmH(url) {
         "--ignore-certificate-errors",
       ],
       turnstile: true,
-    });
+    }));
 
     await page.setRequestInterception(true);
     page.on("request", (request) => {
-      if (
-        request.url().includes("workink.click") ||
-        request.url().includes("youradexchange.com")
-      ) {
+      if (request.url().includes("workink.click") || request.url().includes("youradexchange.com")) {
         request.abort(); // Memblokir permintaan ke iklan
       } else {
         request.continue();
@@ -31,19 +29,22 @@ async function mmH(url) {
       await popup.close();
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-
+    // Tunggu hingga tombol muncul
     const button = await page.$('button[target="_blank"]');
+
     if (button) {
-      await page.click('button[target="_blank"]');
+      await button.click();
       console.log('Tombol diklik.');
     } else {
-      console.log('Tombol tidak ditemukan.');
+      console.log('Tombol tidak ditemukan. Mengambil konten halaman langsung...');
+      function textReady(text){
+        return `There is already a key, please check the URL ${text}`
+      }
+      
       await browser.close();
-      return null; // Kembali jika tombol tidak ditemukan
+      const hh = page.url();
+      return textReady(hh)
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // Tunggu 5 detik
 
     const pages = await browser.pages();
     const newPage = pages[pages.length - 1];
@@ -54,10 +55,8 @@ async function mmH(url) {
 
     if (!r) {
       console.log('Parameter r tidak ditemukan di URL baru.');
-      await newPage.close();
-      await browser.close();
-      return null; // Kembali jika r tidak ditemukan
-    }
+      return null; // Mengembalikan jika r tidak ditemukan
+    }   
 
     const linkvertise = decodeURIComponent(r);
     console.log(`Loot-link: ${linkvertise}`);
@@ -68,19 +67,21 @@ async function mmH(url) {
       console.log(`Decoded URL: ${urlResult}`);
     } catch (decodeError) {
       console.error('Error saat mendekode Base64:', decodeError);
-      await newPage.close();
-      await browser.close();
-      return null; // Kembali jika ada kesalahan saat decoding
+      return null; // Mengembalikan jika ada kesalahan saat decoding
     }
 
     await newPage.close();
     console.log("Halaman baru berhasil ditutup.");
 
-    await browser.close();
     return urlResult;
   } catch (error) {
     console.error("Kesalahan terjadi:", error);
-    return null; // Kembali null jika terjadi kesalahan
+    return null; // Mengembalikan null jika terjadi kesalahan
+  } finally {
+    // Pastikan browser ditutup jika belum ditutup
+    if (browser) {
+      await browser.close(); // Menutup browser
+    }
   }
 }
 
