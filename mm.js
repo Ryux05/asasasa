@@ -1,5 +1,4 @@
 const { connect } = require("puppeteer-real-browser");
-const cheerio = require("cheerio");
 
 async function mmH(url) {
   try {
@@ -29,12 +28,16 @@ async function mmH(url) {
       await popup.close();
     });
 
+    await new Promise((resolve) => setTimeout(resolve, 9000));
+    const startTime = performance.now();
     // Tunggu hingga tombol muncul
     const button = await page.$('button[target="_blank"]');
 
     if (button) {
-      await button.click();
+      await button.click('button[target="_blank"]');
       console.log('Tombol diklik.');
+      // Tunggu beberapa detik untuk memastikan halaman baru terbuka
+      await new Promise((resolve) => setTimeout(resolve, 8000));
     } else {
       console.log('Tombol tidak ditemukan. Mengambil konten halaman langsung...');
       function textReady(text){
@@ -55,7 +58,7 @@ async function mmH(url) {
 
     if (!r) {
       console.log('Parameter r tidak ditemukan di URL baru.');
-      return null; // Mengembalikan jika r tidak ditemukan
+      return { result: null, time_taken: null } // Mengembalikan jika r tidak ditemukan
     }   
 
     const linkvertise = decodeURIComponent(r);
@@ -67,16 +70,20 @@ async function mmH(url) {
       console.log(`Decoded URL: ${urlResult}`);
     } catch (decodeError) {
       console.error('Error saat mendekode Base64:', decodeError);
-      return null; // Mengembalikan jika ada kesalahan saat decoding
+      return { result: null, time_taken: null } // Mengembalikan jika ada kesalahan saat decoding
     }
 
     await newPage.close();
     console.log("Halaman baru berhasil ditutup.");
 
-    return urlResult;
+    const endTime = performance.now();
+    const timeTaken = endTime - startTime; // Calculate the time taken
+    console.log(`Time taken: ${timeTaken.toFixed(2)} ms`); // Log the time taken
+
+    return { result: urlResult, time_taken: timeTaken };
   } catch (error) {
     console.error("Kesalahan terjadi:", error);
-    return null; // Mengembalikan null jika terjadi kesalahan
+    return { result: null, time_taken: null } // Mengembalikan null jika terjadi kesalahan
   } finally {
     // Pastikan browser ditutup jika belum ditutup
     if (browser) {
